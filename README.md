@@ -1,0 +1,2 @@
+# dotgo
+Simple MVC Generator
