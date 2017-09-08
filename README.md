@@ -6,9 +6,11 @@ Simple MVC Generator
 
 ### Prerequisites
 
+- httprouter - github.com/julienschmidt/httprouter
 - sqlq - github.com/valuppo/sqlq
 
 ```
+go get github.com/julienschmidt/httprouter
 go get github.com/valuppo/sqlq
 ```
 
