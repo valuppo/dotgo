@@ -1,0 +1,72 @@
+package db
+
+import "database/sql"
+import (
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"time"
+)
+
+var db *sql.DB
+
+const dbDriver = "DB_DRIVER" //eg: mysql
+const dbProtocol = "DB_PROTOCOL" //eg: tcp
+const dbHost = "DB_HOST" //eg: localhost:3306
+const dbUsername = "DB_USERNAME" //eg: root
+const dbPassword = "DB_PASSWORD" //eg: password
+const dbName = "DB_NAME" //eg: dotgo_db
+
+func init() {
+	var err error
+	dataSourceNameMySQL := fmt.Sprintf("%s:%s@%s(%s)/%s",
+		dbUsername, dbPassword, dbProtocol, dbHost, dbName)
+
+	db, err = sql.Open(dbDriver, dataSourceNameMySQL)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func GetInstance() *sql.DB {
+	return db
+}
+
+//ExecuteQueryRow used for executing query string for method SELECT and return single row
+func ExecuteQueryRow(sql string, args ...interface{}) *sql.Row {
+	t1 := time.Now()
+	row := db.QueryRow(sql)
+	t2 := time.Now()
+	fmt.Println(t2.Sub(t1))
+	return row
+}
+
+//ExecuteQueryRows used for executing query string for method SELECT and return multiple row
+func ExecuteQueryRows(sql string, args ...interface{}) *sql.Rows {
+	t1 := time.Now()
+	rows, err := db.Query(sql)
+	if err != nil {
+		log.Fatalln(err)
+		return nil
+	}
+	t2 := time.Now()
+	fmt.Println(t2.Sub(t1))
+	return rows
+}
+
+//ExecuteStatement used for executing query string for method INSERT, UPDATE, DELETE, etc
+func ExecuteStatement(sql string, args ...interface{}) sql.Result {
+	t1 := time.Now()
+	stmt, err := db.Prepare(sql)
+	defer stmt.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	r, err := stmt.Exec()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	t2 := time.Now()
+	fmt.Println(t2.Sub(t1))
+	return r
+}

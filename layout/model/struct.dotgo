@@ -1,0 +1,64 @@
+package {packageName}
+
+import (
+    "fmt"
+	"{importPath}/db"
+    "github.com/valuppo/sqlq"
+    "log"
+    "strconv"
+    "strings"
+)
+
+var tableName = "{tableName}"
+var tableFields = make([]string, 0)
+
+func init() {
+	tableFields = db.GetStructFieldSQL({structName}{})
+}
+
+type {structName} struct {
+    ID        int64  `json:"id" db:"id"`
+    //Insert Custom field here
+}
+
+func (s *{structName}) Create() {
+	values := db.GetStructValueSQL(*s)
+	sql, err := sqlq.Insert().Into(strings.Join(tableFields,",")).Columns(strings.Join(values,",")).Sql()
+	if err != nil{
+		log.Fatalln(err)
+	}
+	res := db.ExecuteStatement(sql)
+	s.ID, _ = res.LastInsertId()
+}
+
+func (s *{structName}) Update() {
+	values := db.GetStructValueSQL(*s)
+	sqlUpdate := make([]string, 0)
+	for i := 0; i < len(tableFields) && i < len(values); i++ {
+		if tableFields[i] != "created_at" && tableFields[i] != "updated_at" {
+			str := fmt.Sprintf("%v = %v", tableFields[i], values[i])
+			sqlUpdate = append(sqlUpdate, str)
+		}
+	}
+	sql, err := sqlq.Update(tableName).SetMultiple(tableFields, values).Where("id", "=",  strconv.Itoa(int(s.ID))).Sql()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_ = db.ExecuteStatement(sql)
+	//s = Find(s.ID)
+}
+
+func (s *{structName}) Delete() {
+	sql, err := sqlq.Delete().From(tableName).Where("id", "=",  strconv.Itoa(int(s.ID))).Sql()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	_ = db.ExecuteStatement(sql)
+	*s = {structName}{}
+}
+
+
+func New() *{structName} {
+    {structName} := {structName}{}
+	return &{structName}
+}

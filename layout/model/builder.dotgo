@@ -1,0 +1,157 @@
+package {packageName}
+
+import (
+    "errors"
+	"{importPath}/db"
+    "github.com/valuppo/sqlq"
+    "log"
+    "strings"
+)
+
+var errLimitNegative = errors.New("\nLimit can't be negative value")
+var errColumnsSame = errors.New("You have same Columns in your query")
+
+type {builderName}Builder struct {
+	columns       []string
+	conditionsAnd []string
+	conditionsOr  []string
+	orderColumn   []string
+	orderOrder    []string
+	limit         int
+}
+
+func {builderName}() *{builderName}Builder {
+	return &{builderName}Builder{}
+}
+
+func (b *{builderName}Builder) Select(columns ...string) *{builderName}Builder {
+	b.columns = append(b.columns, columns...)
+	return b
+}
+
+func (b *{builderName}Builder) Where(column string, operator string, value string) *WelcomeBuilder {
+	if column != "" && operator != "" && value != "" {
+		b.conditionsAnd = append(b.conditionsAnd, column+" "+operator+" "+value)
+	}
+	return b
+}
+
+func (b *{builderName}Builder) WhereOr(column string, operator string, value string) *WelcomeBuilder {
+	if column != "" && operator != "" && value != "" {
+		b.conditionsOr = append(b.conditionsOr, column+" "+operator+" "+value)
+	}
+	return b
+}
+
+func (b *{builderName}Builder) OrderBy(column string, order string) *{builderName}Builder {
+	b.orderColumn = append(b.orderColumn, column)
+	b.orderOrder = append(b.orderOrder, order)
+	return b
+}
+
+func (b *{builderName}Builder) Limit(limit int) *{builderName}Builder {
+	b.limit = limit
+	return b
+}
+
+func (b *{builderName}Builder) Get() ([]{structName}, error) {
+	var err error
+    {structName}s := make([]{structName}, 0)
+
+	sqlq := sqlq.Select().From(tableName)
+
+	if len(b.columns) > 0 {
+		sqlq.Columns(b.columns...)
+	} else {
+		sqlq.Columns("*")
+	}
+
+	for _, cond := range b.conditionsAnd{
+		cArr := strings.Split(cond, " ")
+		sqlq.Where(cArr[0], cArr[1], cArr[2])
+	}
+
+	for _, cond := range b.conditionsOr{
+		cArr := strings.Split(cond, " ")
+		sqlq.WhereOr(cArr[0], cArr[1], cArr[2])
+	}
+
+	if len(b.orderColumn) > 0 || len(b.orderOrder) > 0 {
+		orderColumnLen := len(b.orderColumn)
+		orderOrderLen := len(b.orderOrder)
+		for i := 0; i < orderColumnLen && i < orderOrderLen; i++ {
+			sqlq.OrderBy(b.orderColumn[i], b.orderOrder[i])
+		}
+	}
+
+	if b.limit > 0 {
+		sqlq.Limit(b.limit)
+	}
+
+	sql, err := sqlq.Sql()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	rows := db.ExecuteQueryRows(sql)
+	defer rows.Close()
+	cols, _ := rows.Columns()
+	for rows.Next() {
+        {structName} := {structName}{}
+		ptrs := db.GetScanAddress(cols, &{structName})
+		err := rows.Scan(ptrs...)
+		if err != nil {
+			log.Fatalln(err)
+        }
+        {structName}s = append({structName}s, {structName})
+	}
+	return {structName}s, nil
+}
+
+func (b *{builderName}Builder) First() ({structName}, error) {
+	var err error
+    {structName} := {structName}{}
+
+	sqlq := sqlq.Select().From(tableName)
+
+	if len(b.columns) > 0 {
+		sqlq.Columns(b.columns...)
+	} else {
+		sqlq.Columns("*")
+	}
+
+	for _, cond := range b.conditionsAnd{
+		cArr := strings.Split(cond, " ")
+		sqlq.Where(cArr[0], cArr[1], cArr[2])
+	}
+
+	for _, cond := range b.conditionsOr{
+		cArr := strings.Split(cond, " ")
+		sqlq.WhereOr(cArr[0], cArr[1], cArr[2])
+	}
+
+	if len(b.orderColumn) > 0 || len(b.orderOrder) > 0 {
+		orderColumnLen := len(b.orderColumn)
+		orderOrderLen := len(b.orderOrder)
+		for i := 0; i < orderColumnLen && i < orderOrderLen; i++ {
+			sqlq.OrderBy(b.orderColumn[i], b.orderOrder[i])
+		}
+	}
+
+	sqlq.Limit(1)
+
+	sql, err := sqlq.Sql()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	rows := db.ExecuteQueryRows(sql)
+	defer rows.Close()
+	cols, _ := rows.Columns()
+	for rows.Next() {
+		ptrs := db.GetScanAddress(cols, &{structName})
+		err := rows.Scan(ptrs...)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	return {structName}, nil
+}

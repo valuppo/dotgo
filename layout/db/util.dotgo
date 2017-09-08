@@ -1,0 +1,71 @@
+package db
+
+import (
+	"fmt"
+	"reflect"
+	"time"
+	"unsafe"
+)
+
+func GetStructFieldSQL(s interface{}) []string {
+	t := reflect.TypeOf(s)
+	fields := make([]string, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		tag := t.Field(i).Tag
+
+		fields[i] = tag.Get("json")
+		if tag.Get("field") != "" {
+			fields[i] = tag.Get("field")
+		}
+	}
+	return fields
+}
+
+func GetStructValueSQL(s interface{}) []string {
+	v := reflect.ValueOf(s)
+	values := make([]string, v.NumField())
+	for i := 0; i < v.NumField(); i++ {
+		tag := v.Type().Field(i).Tag.Get("db")
+		values[i] = fmt.Sprintf("'%v'", v.Field(i))
+		if tag == "created_at" || tag == "updated_at" {
+			values[i] = time.Now().Format("2006-01-02 15:04:05")
+		}
+	}
+	return values
+}
+
+func GetScanAddress(fields []string, s interface{}) []interface{} {
+	result := make([]interface{}, 0)
+
+	v := reflect.ValueOf(s)
+	d := reflect.Indirect(v)
+
+	for i := 0; i < d.NumField(); i++{
+		tag :=  d.Type().Field(i).Tag.Get("db")
+		for j := 0; j < len(fields); j++{
+			if tag == fields[j] {
+				kind := d.Type().Field(i).Type.Kind().String()
+				ptr := unsafe.Pointer(d.Field(j).Addr().Pointer())
+				switch kind {
+				case "int":
+					result = append(result, (*int)(ptr))
+				case "int8":
+					result = append(result, (*int8)(ptr))
+				case "int16":
+					result = append(result, (*int16)(ptr))
+				case "int32":
+					result = append(result, (*int32)(ptr))
+				case "int64":
+					result = append(result, (*int64)(ptr))
+				case "float32":
+					result = append(result, (*float32)(ptr))
+				case "float64":
+					result = append(result, (*float64)(ptr))
+				case "string":
+					result = append(result, (*string)(ptr))
+				}
+			}
+		}
+	}
+	return result
+}

@@ -1,0 +1,18 @@
+package controller
+
+import (
+	"github.com/julienschmidt/httprouter"
+	"net/http"
+)
+
+type {structName}Controller struct {
+}
+
+func (uc *{structName}Controller) Index(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+    //Welcome to your first Dot Go projects
+	w.Write([]byte("Welcome!"))
+}
+
+func New{funcName}Controller() *{structName}Controller{
+	return &{structName}Controller{}
+}

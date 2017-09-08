@@ -1,0 +1,29 @@
+package route
+
+import (
+    "{importPath}/controller"
+    "fmt"
+    "github.com/julienschmidt/httprouter"
+    "net/http"
+    "time"
+)
+
+func InitMux() *httprouter.Router {
+
+	mux := httprouter.New()
+
+	welcomeController := controller.NewWelcomeController()
+
+	mux.GET("/", logger(welcomeController.Index))
+
+	return mux
+}
+
+func logger(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		t1 := time.Now()
+		next(w, r, p)
+		t2 := time.Now()
+		fmt.Println(r.Method, r.URL, t2.Sub(t1))
+	}
+}
