@@ -30,15 +30,15 @@ go install
 
 
 ### How To Use
-- Init new project
-  Required : PROJECT_NAME
+- Init new project <br />
+  Required : PROJECT_NAME <br />
   Optional : PROJECT_PATH (if not specified it will used current directory '.' as path)
 
 ```
 dotgo init <PROJECT_NAME> [PROJECT_PATH]
 ```
 
-- Create new Model
+- Create new Model <br />
   Required : MODEL_NAME
 
 ```
@@ -46,7 +46,7 @@ cd <PROJECT_DIR>
 dotgo model <MODEL_NAME>
 ```
 
-- Create new Controller
+- Create new Controller <br />
   Required : CONTROLLER_NAME
 
 ```
