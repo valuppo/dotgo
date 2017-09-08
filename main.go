@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"github.com/valuppo/dotgo/generator"
+	"os"
+	"github.com/valuppo/dotgo/util"
 )
 
 func main() {
@@ -33,12 +34,14 @@ func main() {
 			fmt.Println("Help Model Commands")
 			return
 		}
+		util.ImportPathInstance().Set("")
 		generator.Model(os.Args[2])
 	case "controller":
 		if len(os.Args) == 2 {
 			fmt.Println("Help Controller Commands")
 			return
 		}
+		util.ImportPathInstance().Set("")
 		generator.Controller(os.Args[2])
 	default:
 		fmt.Println("Wrong command input!")

@@ -24,7 +24,9 @@ func (ic *importPath) Set(projectName string){
 	pwd = strings.Replace(pwd, gopath, "", -1)
 	pwd = strings.Replace(pwd, "src/", "", -1)
 
-	pwd += "/" + projectName
+	if projectName != ""{
+		pwd += "/" + projectName
+	}
 
 	ic.path = pwd
 }

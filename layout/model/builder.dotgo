@@ -29,14 +29,14 @@ func (b *{builderName}Builder) Select(columns ...string) *{builderName}Builder {
 	return b
 }
 
-func (b *{builderName}Builder) Where(column string, operator string, value string) *WelcomeBuilder {
+func (b *{builderName}Builder) Where(column string, operator string, value string) *{builderName}Builder {
 	if column != "" && operator != "" && value != "" {
 		b.conditionsAnd = append(b.conditionsAnd, column+" "+operator+" "+value)
 	}
 	return b
 }
 
-func (b *{builderName}Builder) WhereOr(column string, operator string, value string) *WelcomeBuilder {
+func (b *{builderName}Builder) WhereOr(column string, operator string, value string) *{builderName}Builder {
 	if column != "" && operator != "" && value != "" {
 		b.conditionsOr = append(b.conditionsOr, column+" "+operator+" "+value)
 	}
