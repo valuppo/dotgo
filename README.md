@@ -59,6 +59,7 @@ dotgo controller <CONTROLLER_NAME>
 ## Built With
 
 * [Golang](https://golang.org/) - Programming Language
+* [Http Router](https://github.com/julienschmidt/httprouter) - Go HTTP Router
 * [Sqlq](https://github.com/valuppo/sqlq) - SQL Query Builder
 
 ## Authors
